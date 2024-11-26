@@ -2,9 +2,9 @@ import base64
 import json
 import os
 import sys
+import typing
 from http import HTTPStatus
 from pathlib import Path
-from typing import NoReturn
 from urllib.parse import urlparse
 
 import id  # pylint: disable=redefined-builtin
@@ -90,6 +90,28 @@ If a claim is not present in the claim set, then it is rendered as `MISSING`.
 See https://docs.pypi.org/trusted-publishers/troubleshooting/ for more help.
 """
 
+_REUSABLE_WORKFLOW_WARNING = """
+The claims in this token suggest that the calling workflow is a reusable workflow.
+
+In particular, this action was initiated by:
+
+    {job_workflow_ref}
+
+Whereas its parent workflow is:
+
+    {workflow_ref}
+
+Reusable workflows are **not currently supported** by PyPI's Trusted Publishing
+functionality, and are subject to breakage. Users are **strongly encouraged**
+to avoid using reusable workflows for Trusted Publishing until support
+becomes official.
+
+For more information, see:
+
+* https://docs.pypi.org/trusted-publishers/troubleshooting/#reusable-workflows-on-github
+* https://github.com/pypa/gh-action-pypi-publish/issues/166
+"""
+
 # Rendered if the package index's token response isn't valid JSON.
 _SERVER_TOKEN_RESPONSE_MALFORMED_JSON = """
 Token request failed: the index produced an unexpected
@@ -110,7 +132,7 @@ a few minutes and try again.
 """  # noqa: S105; not a password
 
 
-def die(msg: str) -> NoReturn:
+def die(msg: str) -> typing.NoReturn:
     with _GITHUB_STEP_SUMMARY.open('a', encoding='utf-8') as io:
         print(_ERROR_SUMMARY_MESSAGE.format(message=msg), file=io)
 
@@ -120,6 +142,14 @@ def die(msg: str) -> NoReturn:
     msg = msg.replace('\n', '%0A')
     print(f'::error::Trusted publishing exchange failure: {msg}', file=sys.stderr)
     sys.exit(1)
+
+
+def warn(msg: str) -> None:
+    with _GITHUB_STEP_SUMMARY.open('a', encoding='utf-8') as io:
+        print(msg, file=io)
+
+    msg = msg.replace('\n', '%0A')
+    print(f'::warning::Potential workflow misconfiguration: {msg}', file=sys.stderr)
 
 
 def debug(msg: str):
@@ -161,13 +191,15 @@ def assert_successful_audience_call(resp: requests.Response, domain: str):
             )
 
 
-def render_claims(token: str) -> str:
+def extract_claims(token: str) -> dict[str, typing.Any]:
     _, payload, _ = token.split('.', 2)
 
     # urlsafe_b64decode needs padding; JWT payloads don't contain any.
     payload += '=' * (4 - (len(payload) % 4))
-    claims = json.loads(base64.urlsafe_b64decode(payload))
+    return json.loads(base64.urlsafe_b64decode(payload))
 
+
+def render_claims(claims: dict[str, typing.Any]) -> str:
     def _get(name: str) -> str:  # noqa: WPS430
         return claims.get(name, 'MISSING')
 
@@ -179,6 +211,21 @@ def render_claims(token: str) -> str:
         workflow_ref=_get('workflow_ref'),
         job_workflow_ref=_get('job_workflow_ref'),
         ref=_get('ref'),
+    )
+
+
+def warn_on_reusable_workflow(claims: dict[str, typing.Any]) -> None:
+    # A reusable workflow is identified by having different values
+    # for its workflow_ref (the initiating workflow) and job_workflow_ref
+    # (the reusable workflow).
+    if claims.get('workflow_ref') == claims.get('job_workflow_ref'):
+        return
+
+    warn(
+        _REUSABLE_WORKFLOW_WARNING.format(
+            job_workflow_ref=claims.get('job_workflow_ref'),
+            workflow_ref=claims.get('workflow_ref'),
+        ),
     )
 
 
@@ -223,11 +270,18 @@ try:
     oidc_token = id.detect_credential(audience=oidc_audience)
 except id.IdentityError as identity_error:
     cause_msg_tmpl = (
-        _TOKEN_RETRIEVAL_FAILED_FORK_PR_MESSAGE if event_is_third_party_pr()
+        _TOKEN_RETRIEVAL_FAILED_FORK_PR_MESSAGE
+        if event_is_third_party_pr()
         else _TOKEN_RETRIEVAL_FAILED_MESSAGE
     )
     for_cause_msg = cause_msg_tmpl.format(identity_error=identity_error)
     die(for_cause_msg)
+
+
+# Perform a non-fatal check to see if we're running on a reusable
+# workflow, and emit a warning if so.
+oidc_claims = extract_claims(oidc_token)
+warn_on_reusable_workflow(oidc_claims)
 
 # Now we can do the actual token exchange.
 mint_token_resp = requests.post(
@@ -255,7 +309,7 @@ if not mint_token_resp.ok:
         for error in mint_token_payload['errors']
     )
 
-    rendered_claims = render_claims(oidc_token)
+    rendered_claims = render_claims(oidc_claims)
 
     die(
         _SERVER_REFUSED_TOKEN_EXCHANGE_MESSAGE.format(
