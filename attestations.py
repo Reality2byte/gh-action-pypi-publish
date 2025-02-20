@@ -82,8 +82,8 @@ def assert_attestations_do_not_pre_exist(
 
     existing_attestations_list = '\n'.join(map(str, existing_attestations))
     error_message = (
-        'The following distributions already have publish attestations:'
-        f'{existing_attestations_list}',
+        'The following distributions already have publish attestations: '
+        f'{existing_attestations_list}'
     )
     die(error_message)
 
