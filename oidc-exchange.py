@@ -86,6 +86,7 @@ If a claim is not present in the claim set, then it is rendered as `MISSING`.
 * `workflow_ref`: `{workflow_ref}`
 * `job_workflow_ref`: `{job_workflow_ref}`
 * `ref`: `{ref}`
+* `environment`: `{environment}`
 
 See https://docs.pypi.org/trusted-publishers/troubleshooting/ for more help.
 """
@@ -179,6 +180,7 @@ def render_claims(token: str) -> str:
         workflow_ref=_get('workflow_ref'),
         job_workflow_ref=_get('job_workflow_ref'),
         ref=_get('ref'),
+        environment=_get('environment'),
     )
 
 
