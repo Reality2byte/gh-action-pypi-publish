@@ -54,6 +54,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: test
+        persist-credentials: false
     - name: Fail-fast in unsupported environments
       continue-on-error: true
       id: fail-fast
@@ -89,6 +90,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: test
+        persist-credentials: false
     - name: Install the packaging-related tools
       run: python3 -m pip install build twine
       env:

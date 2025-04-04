@@ -13,6 +13,8 @@ on:   # yamllint disable-line rule:truthy
         required: true
         type: string
 
+permissions: {}
+
 jobs:
   smoke-test:
     uses: ./.github/workflows/reusable-smoke-test.yml
@@ -34,6 +36,8 @@ jobs:
         jobs: ${{ toJSON(needs) }}
 
   build-and-push:
+    permissions:
+      packages: write
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     needs:
@@ -41,6 +45,8 @@ jobs:
     timeout-minutes: 10
     steps:
     - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
     - name: Build Docker image
       run: |
         DOCKER_TAG="${DOCKER_TAG/'/'/'-'}"
