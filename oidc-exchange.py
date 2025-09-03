@@ -2,7 +2,7 @@ import base64
 import json
 import os
 import sys
-import typing
+import typing as t
 from http import HTTPStatus
 from pathlib import Path
 from urllib.parse import urlparse
@@ -135,7 +135,7 @@ a few minutes and try again.
 """  # noqa: S105; not a password
 
 
-def die(msg: str) -> typing.NoReturn:
+def die(msg: str) -> t.NoReturn:
     with _GITHUB_STEP_SUMMARY.open('a', encoding='utf-8') as io:
         print(_ERROR_SUMMARY_MESSAGE.format(message=msg), file=io)
 
