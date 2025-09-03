@@ -110,7 +110,9 @@ becomes official. Please, do not report bugs if this breaks.
 For more information, see:
 
 * https://docs.pypi.org/trusted-publishers/troubleshooting/#reusable-workflows-on-github
-* https://github.com/pypa/gh-action-pypi-publish/issues/166
+* https://github.com/pypa/gh-action-pypi-publish/issues/166 — subscribe to
+  this issue to watch the progress and learn when reusable workflows become
+  supported officially
 """
 
 # Rendered if the package index's token response isn't valid JSON.
