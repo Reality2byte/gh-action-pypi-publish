@@ -95,7 +95,6 @@ repos:
       WPS102,
       WPS110,
       WPS111,
-      WPS202,
       WPS305,
       WPS318,
       WPS326,
@@ -110,7 +109,7 @@ repos:
       WPS440,
       WPS441,
       WPS453,
-    - --max-module-members=8  # WPS202
+    - --per-file-ignores=attestations.py:WPS202 oidc-exchange.py:WPS202
     additional_dependencies:
     - flake8-2020 ~= 1.8.1
     - flake8-pytest-style ~= 2.1.0
