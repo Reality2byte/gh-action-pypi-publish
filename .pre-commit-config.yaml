@@ -115,6 +115,70 @@ repos:
     - flake8-pytest-style ~= 2.1.0
     - wemake-python-styleguide ~= 1.0.0
 
+- repo: https://github.com/pre-commit/mirrors-mypy.git
+  rev: v1.16.1
+  hooks:
+  - id: mypy
+    alias: mypy-py313
+    name: MyPy, for Python 3.13
+    additional_dependencies:
+    - id  # used by `oidc-exchange.py`
+    - lxml  # dep of `--txt-report`, `--cobertura-xml-report` & `--html-report`
+    - packaging  # used by `print-pkg-names.py`
+    - pypi-attestations  # used by `attestations.py`
+    - sigstore  # used by `attestations.py`
+    - types-requests  # used by `oidc-exchange.py`
+    args:
+    - --python-version=3.13
+    - --any-exprs-report=.tox/.tmp/.test-results/mypy--py-3.13
+    - --cobertura-xml-report=.tox/.tmp/.test-results/mypy--py-3.13
+    - --html-report=.tox/.tmp/.test-results/mypy--py-3.13
+    - --linecount-report=.tox/.tmp/.test-results/mypy--py-3.13
+    - --linecoverage-report=.tox/.tmp/.test-results/mypy--py-3.13
+    - --lineprecision-report=.tox/.tmp/.test-results/mypy--py-3.13
+    - --txt-report=.tox/.tmp/.test-results/mypy--py-3.13
+    pass_filenames: false
+  - id: mypy
+    alias: mypy-py312
+    name: MyPy, for Python 3.12
+    additional_dependencies:
+    - id  # used by `oidc-exchange.py`
+    - lxml  # dep of `--txt-report`, `--cobertura-xml-report` & `--html-report`
+    - packaging  # used by `print-pkg-names.py`
+    - pypi-attestations  # used by `attestations.py`
+    - sigstore  # used by `attestations.py`
+    - types-requests  # used by `oidc-exchange.py`
+    args:
+    - --python-version=3.12
+    - --any-exprs-report=.tox/.tmp/.test-results/mypy--py-3.12
+    - --cobertura-xml-report=.tox/.tmp/.test-results/mypy--py-3.12
+    - --html-report=.tox/.tmp/.test-results/mypy--py-3.12
+    - --linecount-report=.tox/.tmp/.test-results/mypy--py-3.12
+    - --linecoverage-report=.tox/.tmp/.test-results/mypy--py-3.12
+    - --lineprecision-report=.tox/.tmp/.test-results/mypy--py-3.12
+    - --txt-report=.tox/.tmp/.test-results/mypy--py-3.12
+    pass_filenames: false
+  - id: mypy
+    alias: mypy-py311
+    name: MyPy, for Python 3.11
+    additional_dependencies:
+    - id  # used by `oidc-exchange.py`
+    - lxml  # dep of `--txt-report`, `--cobertura-xml-report` & `--html-report`
+    - packaging  # used by `print-pkg-names.py`
+    - pypi-attestations  # used by `attestations.py`
+    - sigstore  # used by `attestations.py`
+    - types-requests  # used by `oidc-exchange.py`
+    args:
+    - --python-version=3.11
+    - --any-exprs-report=.tox/.tmp/.test-results/mypy--py-3.11
+    - --cobertura-xml-report=.tox/.tmp/.test-results/mypy--py-3.11
+    - --html-report=.tox/.tmp/.test-results/mypy--py-3.11
+    - --linecount-report=.tox/.tmp/.test-results/mypy--py-3.11
+    - --linecoverage-report=.tox/.tmp/.test-results/mypy--py-3.11
+    - --lineprecision-report=.tox/.tmp/.test-results/mypy--py-3.11
+    - --txt-report=.tox/.tmp/.test-results/mypy--py-3.11
+    pass_filenames: false
+
 - repo: https://github.com/PyCQA/pylint.git
   rev: v3.3.4
   hooks:
