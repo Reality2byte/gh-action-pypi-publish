@@ -13,7 +13,7 @@ sigstore_logger = logging.getLogger('sigstore')
 sigstore_logger.setLevel(logging.DEBUG)
 sigstore_logger.addHandler(logging.StreamHandler())
 
-_GITHUB_STEP_SUMMARY = Path(os.getenv('GITHUB_STEP_SUMMARY'))
+_GITHUB_STEP_SUMMARY = Path(os.environ['GITHUB_STEP_SUMMARY'])
 
 # The top-level error message that gets rendered.
 # This message wraps one of the other templates/messages defined below.
@@ -122,6 +122,8 @@ def get_identity_token() -> IdentityToken:
     # from the environment or if the token is malformed.
     # NOTE: audience is always sigstore.
     oidc_token = detect_credential()
+    if oidc_token is None:
+        raise IdentityError('Attempted to discover OIDC in broken environment')
     return IdentityToken(oidc_token)
 
 
