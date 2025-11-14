@@ -199,4 +199,9 @@ repos:
     - --output-format
     - colorized
 
+- repo: https://github.com/rhysd/actionlint.git
+  rev: v1.7.8
+  hooks:
+  - id: actionlint
+
 ...
